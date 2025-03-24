@@ -1,0 +1,17 @@
+# .gitignore - Add patterns for data files you want to exclude
+
+!*.  # Exclude files with no extension
+
+*.npy
+*.npz
+*.np
+*.mat
+*.img
+*.IMG
+*.zip
+*.[0-9]*
+*.bds
+*.exe
+*.obj
+
+/.git/
