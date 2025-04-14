@@ -2,53 +2,59 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-
 def logistic_map(x0, r, n):
-	
-	xs = [x0]
 
-	for i in range(n-1):
+    xs = np.empty((n))
+    xs[0] = x0
 
-		xn = xs[i]
-		xnp1 = r*xn*(1-xn)
+    for i in range(1, n):
 
-		xs.append(xnp1)
+        xn = xs[i-1]
+        xnp1 = r*xn*(1-xn)
 
-	return xs
+        xs[i] = xnp1
+
+    return xs
+
+
+def plot_animate(xks):
+
+    fig, ax = plt.subplots()
+
+    def update(n):
+        ax.clear()
+        ax.set_title(f"N: {n}")
+
+        ax.set_xlim(0, 4)
+        ax.set_ylim(0, 1)
+        ax.set_xlabel('r')
+        ax.set_ylabel('xn')
+
+        for x_index, x in enumerate(x_values):
+            ax.plot(r_values, xks[x_index, :, n], linewidth=0.1, c='k')
+
+    anim = animation.FuncAnimation(fig, update, frames=100, interval=100)
+
+    plt.show()
+
 
 if __name__ == '__main__':
 
-	x_values = np.random.rand(100)
-	n = 100
+    n = 100
 
-	r_values = np.linspace(0,4,100)
+    x_values = np.random.uniform(0, 1, 100)
 
+    r_values = np.linspace(0, 4, 100)
 
-	x_values_ks = []
-
-	xks = np.empty((100, 100, 100))
+    xks = np.empty((100, 100, n))
 
 
-	for x_index, x in enumerate(x_values):
+    for x_index, x in enumerate(x_values):
 
-		for r_index, r in enumerate(r_values):
-		
-			xs = logistic_map(x, r, n)
+        for r_index, r in enumerate(r_values):
 
-			xks[x_index, r_index, :] = xs
-		
-	fig, ax = plt.subplots()
+            xs = logistic_map(x, r, n)
 
-	ax.set_xlim(min(r_values), max(r_values))
-	ax.set_ylim(xks.min(), xks.max())
+            xks[x_index, r_index, :] = xs
 
-	def update(n):
-	    ax.clear()
-	    ax.set_title(f"N: {n}")  # Dynamic title
-
-	    for x_index, x in enumerate(x_values):
-	        ax.plot(r_values, xks[x_index, :, n], c='black')
-
-	ani = animation.FuncAnimation(fig, update, frames=51, interval=100)
-
-	plt.show()
+    plot_animate(xks)

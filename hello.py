@@ -1,5 +1,7 @@
 import numpy as np
 
+print(np.rand)
+
 samples = 1000000
 x = np.random.rand(samples)*2 - 1
 y = np.random.rand(samples)*2 - 1
