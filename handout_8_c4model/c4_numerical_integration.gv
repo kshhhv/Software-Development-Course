@@ -1,0 +1,85 @@
+digraph iterative{
+    rankdir="TB";
+    dpi=300;
+    edge [ style=dashed ];
+    node[
+        shape = rect
+        style = "filled, rounded"
+        color = "#a4fad0"
+    ];
+    user [
+        label=<
+            <table border="0" cellborder="0">
+                <tr> <td><b>Scientist</b></td> </tr>
+                <tr> <td>[Person]</td> </tr>
+                <tr> <td>A researcher using the tool</td> </tr>
+            </table>
+        >
+    ]
+    node[
+        shape = rect
+        style = filled
+        fillcolor = "#9db5f7"
+        color = "black"
+    ];
+    subgraph cluster_software {
+        label=<<b>Numerical Integration Solver</b>>
+        cli [
+            label=<
+                <table border="0" cellborder="0">
+                    <tr> <td><b>System of differential equations</b></td> </tr>
+                    <tr> <td>[Container: Python]</td> </tr>
+                    <tr> <td>The input file with constants, equations and initial values</td> </tr>
+                </table>
+            >
+        ]
+        lib [
+            label=<
+                <table border="0" cellborder="0">
+                    <tr> <td><b>Simulation library</b></td> </tr>
+                    <tr> <td>[Container: Python]</td> </tr>
+                    <tr> <td>Solves the equations using implicit/explicit euler</td> </tr>
+                </table>
+            >
+        ]
+        vis [
+            label=<
+                <table border="0" cellborder="0">
+                    <tr> <td><b>Visualization tool</b></td> </tr>
+                    <tr> <td>[Container: Matplotlib]</td> </tr>
+                    <tr> <td>Plots the solved equations</td> </tr>
+                </table>
+            >
+        ]
+    }
+        node[
+        shape = rect
+        style = filled
+        fillcolor = "#cfcfcf"
+        color = "black"
+    ];
+    storage [
+        label=<
+            <table border="0" cellborder="0">
+                <tr> <td><b>Results</b></td> </tr>
+                <tr> <td>[Container: Filesystem and HDF5]</td> </tr>
+                <tr> <td>The simulation results stored in different formats</td> </tr>
+            </table>
+        >
+    ]
+
+        node[
+        shape = rect
+        style = filled
+        fillcolor = "#cfcfcf"
+        color = "black"
+    ];
+
+    user -> cli [label="Locates input file and integration settings"]
+    user -> storage [label="Access previous results"]
+
+    cli -> lib [label="Defines equations and calls method"]
+    lib -> storage [label="Reads from \nand writes to"]
+    lib -> vis [label="Plot is true"]
+    storage -> vis [label="Reads directly"]
+}

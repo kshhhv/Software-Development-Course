@@ -1,7 +1,13 @@
-site_name: MkLorum
+site_name: Software Development Course
 
 nav:
   - Home: index.md
   - About: about.md
+  - DocStrings: api.md
 
-theme: readthedocs
+plugins:
+- search
+- mkdocstrings
+
+theme: 
+  name: "material"

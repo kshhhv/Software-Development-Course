@@ -1,0 +1,5 @@
+Completed in 26.433789491653442
+
+real    0m26.967s
+user    0m27.883s
+sys     0m0.093s

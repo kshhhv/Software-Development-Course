@@ -1,0 +1,79 @@
+Completed in 44.191728830337524
+Wrote profile results to not_parallel.py.lprof
+Timer unit: 1e-06 s
+
+Total time: 43.6024 s
+File: not_parallel.py
+Function: fit_akimov_model at line 22
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    22                                           @profile
+    23                                           def fit_akimov_model(phase, albedo, initial_guess, bounds):
+    24     64800     117790.0      1.8      0.3      phase_clean = phase[np.isfinite(phase) & np.isfinite(albedo)]
+    25     64800      93986.5      1.5      0.2      albedo_clean = albedo[np.isfinite(phase) & np.isfinite(albedo)]
+    26                                           
+    27     64800     116071.5      1.8      0.3      if len(phase_clean) < 8 or np.min(phase_clean) > 2:
+    28     50698      11139.1      0.2      0.0          return None
+    29                                           
+    30     14102       1571.7      0.1      0.0      try:
+    31     28204   42585768.5   1509.9     97.7          params, cov = curve_fit(
+    32     14102       2332.0      0.2      0.0              akimov_phase, phase_clean, albedo_clean,
+    33     14102       1782.1      0.1      0.0              p0=initial_guess, bounds=bounds, maxfev=100000
+    34                                                   )
+    35                                               except Exception as e:
+    36                                                   print(f"Fit error: {e}")
+    37                                                   return None
+    38                                           
+    39     14102     125002.6      8.9      0.3      fitted = akimov_phase(phase_clean, *params)
+    40     14102      15472.9      1.1      0.0      residuals = albedo_clean - fitted
+    41     14102     109510.3      7.8      0.3      rss = np.sum(residuals**2)
+    42     14102     312923.6     22.2      0.7      tss = np.sum((albedo_clean - np.mean(albedo_clean))**2)
+    43     14102      15413.4      1.1      0.0      r2 = 1 - rss / tss if tss > 0 else np.nan
+    44     14102      79117.4      5.6      0.2      errors = np.sqrt(np.diag(cov))
+    45                                           
+    46     14102      14546.6      1.0      0.0      return params, errors, rss, r2, phase_clean, albedo_clean, fitted
+
+Total time: 44.1161 s
+File: not_parallel.py
+Function: main at line 50
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    50                                           @profile
+    51                                           def main():
+    52         1        123.9    123.9      0.0      script_dir = Path(__file__).resolve().parent
+    53         1          5.5      5.5      0.0      data_file = script_dir / "binned_albedo_per_image.npz"
+    54                                           
+    55         2       2352.0   1176.0      0.0      with np.load(data_file) as data:
+    56         1      30464.4  30464.4      0.1          aeq_mean = data["aeq_mean"]
+    57         1      29602.6  29602.6      0.1          phase_mean = data["phase_mean"]
+    58         1      43950.6  43950.6      0.1          count = data["count"]
+    59         1        243.3    243.3      0.0          lat_centers = data["lat_centers"]
+    60         1        143.6    143.6      0.0          lon_centers = data["lon_centers"]
+    61                                           
+    62         1          0.9      0.9      0.0      num_lat, num_lon, num_images = aeq_mean.shape
+    63         1       1049.9   1049.9      0.0      output = initialize_output_arrays((num_lat, num_lon))
+    64                                           
+    65         1          0.4      0.4      0.0      initial_guess = [0.07, 0.02, 0.3, 0.2]
+    66         1          0.4      0.4      0.0      bounds = ([0.0, 0.0, 0.0, 0.0], [0.2, 0.1, 2, 1])
+    67                                           
+    68       181         26.9      0.1      0.0      for i in range(num_lat):
+    69     64980       8427.2      0.1      0.0          for j in range(num_lon):
+    70    129600   43839358.0    338.3     99.4              result = fit_akimov_model(
+    71     64800      32574.0      0.5      0.1                  phase_mean[i, j, :], aeq_mean[i, j, :],
+    72     64800       5789.4      0.1      0.0                  initial_guess, bounds
+    73                                                       )
+    74                                           
+    75     64800       6671.5      0.1      0.0              if result is None:
+    76     50698       4858.8      0.1      0.0                  continue
+    77                                           
+    78     14102       8533.3      0.6      0.0              params, errors, rss, r2, phase_clean, albedo_clean, fitted = result
+    79     14102      32504.2      2.3      0.1              output['A'][i, j], output['nu1'][i, j], output['m'][i, j], output['nu2'][i, j] = params
+    80     14102      18339.2      1.3      0.0              output['A_error'][i, j], output['nu1_error'][i, j], output['m_error'][i, j], output['nu2_error'][i, j] = errors
+    81     14102       3784.7      0.3      0.0              output['rss'][i, j] = rss
+    82     14102       3507.7      0.2      0.0              output['r2'][i, j] = r2
+    83                                           
+    84                                               # Save output
+    85         1      43749.9  43749.9      0.1      np.savez_compressed(script_dir / "akimov_fit_gridded.npz", **output)
+
